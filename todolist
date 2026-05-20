@@ -1,0 +1,71 @@
+#!/bin/bash
+
+TODO_FILE="todo.txt"
+
+# Ensure the todo file exists
+touch "$TODO_FILE"
+
+case "$1" in
+    add)
+        if [ -z "$2" ]; then
+            echo "Usage: $0 add \"Task description\""
+            exit 1
+        fi
+        # Append the task with an empty checkbox [ ]
+        echo "[ ] $2" >> "$TODO_FILE"
+        echo "Task added successfully!"
+        ;;
+
+    list)
+        if [ ! -s "$TODO_FILE" ]; then
+            echo "Your todo list is empty! 🎉"
+            exit 0
+        fi
+        # Read file line by line and print with numbering
+        count=1
+        while read -r line; do
+            echo "$count. $line"
+            count=$((count + 1))
+        done < "$TODO_FILE"
+        ;;
+
+    done)
+        if [ -z "$2" ]; then
+            echo "Usage: $0 done <task_number>"
+            exit 1
+        fi
+        
+        task_num=$2
+        total_tasks=$(wc -l < "$TODO_FILE")
+
+        if [ "$task_num" -le 0 ] || [ "$task_num" -gt "$total_tasks" ]; then
+            echo "Error: Invalid task number." >&2
+            exit 1
+        fi
+
+        # Replace [ ] with [x] for the specific line number
+        # Uses sed to modify the file in-place
+        sed -i "${task_num}s/\[ \]/\[x\]/" "$TODO_FILE"
+        echo "Nice job 🚀"
+        ;;
+
+    clear)
+        # Empty the file contents
+        > "$TODO_FILE"
+        echo "Todo list cleared 🗑️"
+        ;;
+
+    search)
+        if [ -z "$2" ]; then
+            echo "Usage: $0 search <keyword>"
+            exit 1
+        fi
+        # Search using grep and print matching lines with their original line numbers
+        grep -n "$2" "$TODO_FILE"
+        ;;
+
+    *)
+        echo "Usage: $0 {add|list|done|clear|search}"
+        exit 1
+        ;;
+esac
