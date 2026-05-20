@@ -1,0 +1,5 @@
+echo "Enter two value ="
+read a
+read b
+c=`echo $a*$b | bc`
+echo "The multiplication is = $c"
